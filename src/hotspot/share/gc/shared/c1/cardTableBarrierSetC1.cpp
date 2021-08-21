@@ -66,6 +66,14 @@ void CardTableBarrierSetC1::post_barrier(LIRAccess& access, LIR_OprDesc* addr, L
 #else
   LIR_Opr tmp = gen->new_pointer_register();
   if (TwoOperandLIRForm) {
+#if 1
+    // addr may be a stack location because of register spill.
+    if (addr->is_oop()) {
+      LIR_Opr tmp2 = gen->new_register(T_OBJECT);
+      __ move(addr, tmp2);
+      __ move(tmp2, tmp);
+    } else
+#endif
     __ move(addr, tmp);
     __ unsigned_shift_right(tmp, CardTable::card_shift, tmp);
   } else {
