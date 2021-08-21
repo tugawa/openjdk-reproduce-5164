@@ -1,11 +1,34 @@
-# Welcome to the JDK!
+# Reproduce the bug reported as #5164
 
-For build instructions please see the
-[online documentation](https://openjdk.java.net/groups/build/doc/building.html),
-or either of these files:
+The following steps causes an assertion failure.
 
-- [doc/building.html](doc/building.html) (html version)
-- [doc/building.md](doc/building.md) (markdown version)
+## disable
 
-See <https://openjdk.java.net/> for more information about
-the OpenJDK Community and the JDK.
+Disable the fix in src/hotspot/share/gc/shared/c1/cardTableBarrierSetC1.cpp.
+```
+- #if 1
++ #if 0
+```
+
+## configure options
+--with-jvm-variants=server --with-debug-level=fastdebug --with-native-debug-symbols=internal --with-extra-cflags='-march=native -DSUPPORT_BARRIER_ON_PRIMITIVES'
+
+## .hotspotrc
+
+```
++UseSerialGC
+TieredStopAtLevel=1
+ErrorFile=error.log
++UnlockDiagnosticVMOptions
++UnlockExperimentalVMOptions
++ReduceSignalUsage
+-VerifyDependencies
+```
+
+## command line 
+
+```
+build/linux-x86_64-server-fastdebug/jdk/bin/java -Xbatch -Xcomp -jar dacapo-9.12-MR1-bach.jar xalan
+```
+
+Dacapo can is downloaded from https://sourceforge.net/projects/dacapobench/files/9.12-bach-MR1/
